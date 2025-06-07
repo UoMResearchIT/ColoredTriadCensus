@@ -36,8 +36,19 @@ expect_equal_census <- function(actual, expected) {
   invisible(actual)
 }
 
-test_that("T003-111", {
-  triads <- colored.triad.census(matrix(0,3,3), c(1,1,1))
+# test single-colored triad definitions
+lapply(names(triad.types), function(triad) {
+  test_that(paste0("T", triad, "-111"), {
+    mat <- triad.types[[triad]]
+    expected <- 1
+    names(expected) <- paste0("T", triad, "-111")
+    census <- colored.triad.census(mat, c(1,1,1), directed = TRUE)
+    expect_equal_census(census, expected)
+  })
+})
+
+test_that("T003-111 variations", {
+  triads <- colored.triad.census(matrix(0,3,3), c(2,2,2), directed = FALSE)
   expect_equal_census(triads, c("T003-111" = 1))
 
   triads <- colored.triad.census(matrix(0,3,3), c(1,1,1), directed = TRUE)
@@ -53,4 +64,45 @@ test_that("T003-123", {
 
   triads <- colored.triad.census(matrix(0,3,3), c(3,2,1))
   expect_equal_census(triads, c("T003-123" = 1))
+
+  triads <- colored.triad.census(matrix(0,3,3), c(1,2,NA))
+  expect_equal_census(triads, c("T003-123" = 1))
+})
+
+test_that("T003-122", {
+  triads <- colored.triad.census(matrix(0,3,3), c(1,2,2))
+  expect_equal_census(triads, c("T003-122" = 1))
+
+  triads <- colored.triad.census(matrix(0,3,3), c(2,1,2))
+  expect_equal_census(triads, c("T003-122" = 1))
+})
+
+test_that("T003-122 4x4", {
+  triads <- colored.triad.census(matrix(0,4,4), c(1,2,2,2))
+  expect_equal_census(triads, c("T003-122" = 3, "T003-222" = 1))
+
+  triads <- colored.triad.census(matrix(0,4,4), c(2,1,1,1))
+  expect_equal_census(triads, c("T003-112" = 3, "T003-111" = 1))
+})
+
+test_that("T012", {
+  mat <- triad.types[["012"]]
+
+  triads <- colored.triad.census(mat, c(1,2,2), directed = TRUE)
+  expect_equal_census(triads, c("T012-122" = 1))
+
+  triads <- colored.triad.census(t(mat), c(2,2,1), directed = TRUE)
+  expect_equal_census(triads, c("T012-122" = 1))
+
+  triads <- colored.triad.census(mat, c(1,2,1), directed = TRUE)
+  expect_equal_census(triads, c("T012-121" = 1))
+
+  triads <- colored.triad.census(t(mat), c(1,2,1), directed = TRUE)
+  expect_equal_census(triads, c("T012-121" = 1))
+
+  triads <- colored.triad.census(mat, c(2,1,1), directed = TRUE)
+  expect_equal_census(triads, c("T012-211" = 1))
+
+  triads <- colored.triad.census(t(mat), c(1,1,2), directed = TRUE)
+  expect_equal_census(triads, c("T012-211" = 1))
 })
