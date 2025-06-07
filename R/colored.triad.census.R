@@ -82,6 +82,24 @@ makeUniqueTri=function(triangle,colorCombs){
   return(out)
 }
 
+#' Classification index for colored triads of a given `type`
+#'
+#' @param type triad type code, must be in `names(triad.types)`
+#' @param ncolors max. number of colors for the graph
+#'
+#' @return `ncolors^3` integer vector indicating a unique identifier
+#'  for each color permutation. Equivalent permutations will share the
+#'  same index.
+unique.triad.index <- function(type, ncolors) {
+
+  # TODO: call makeUniqueTri (and cache) for ncolors > 10
+  # imp=makeUniqueTri(triangle=triangle,colorCombs)
+  stopifnot(ncolors <= 10)
+
+  triangle <- triad.types[[type]]
+  imp <- uniTri[[paste(ncolors, type, sep = " ")]]
+}
+
 #' @importFrom Matrix t diag
 remEx=function(triad,colorCombs,testM,testE0,testC,cmat){
   T003Col=c()
@@ -182,8 +200,10 @@ remEx=function(triad,colorCombs,testM,testE0,testC,cmat){
       triangle=matrix(c(0,1,1,1,0,1,1,1,0),nrow=3)
     }
   }
-  imp=uniTri[names(uniTri)==paste((max(colorCombs)),triad,sep=" ")][[1]]
-  #imp=makeUniqueTri(triangle=triangle,colorCombs)
+
+  imp = unique.triad.index(triad, max(colorCombs))
+  stopifnot(length(imp) == length(T003Col))
+
   T003Col2=c()
   for(i in unique(imp))
   {
