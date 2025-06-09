@@ -224,8 +224,26 @@ remEx=function(triad,colorCombs,testM,testE0,testC,cmat){
   return(T003Col2)
 }
 
-#' @importFrom Matrix Matrix
-colored.triad.census=function(mat,col,directed=F){
+
+#' @param mat adjacency matrix
+#' @param col vector of colors for each node
+#' @param color.set complete/ordered set of colors
+#' @param directed whether to count directed triads
+#' @return a named vector with counts of colored triads
+#'
+#' @importFrom Matrix Matrix t diag
+#' @importFrom gtools permutations
+#' @export
+colored.triad.census <- function(mat,
+                                 col = rep(1, nrow(mat)),
+                                 color.set = sort(unique(col), na.last = TRUE),
+                                 directed = FALSE){
+
+  stopifnot(all(col %in% color.set))
+  stopifnot(nrow(mat) == ncol(mat))
+  stopifnot(length(col) == nrow(mat))
+  stopifnot(all(mat %in% c(0, 1)))
+
   #Adjacency matrix
   testA=mat[,]
   #Asymmetric edges only
@@ -245,19 +263,16 @@ colored.triad.census=function(mat,col,directed=F){
   testE=Matrix(testE)
   testE0=Matrix(testE0)
 
-  #Colors
-  #number of colors
-  colnum=length(unique(col))
-  colors=1:length(unique(col))
-  names(colors)=unique(col)
-  colNums=colors[match(col,names(colors))]
+  colnum <- length(color.set)
+  colNums <- match(col, color.set)
+
   #Makes matrix for each color where for every node that is that color, that entire column is 1
   cmat=list()
   for(i in 1:colnum){
     cmat[[i]]=Matrix(rep(colNums==i,length(col)),nrow=length(col),byrow=FALSE)*1
     cmat[[i]][,]
   }
-  colorCombs=permutations(colnum,3,unique(colors),repeats.allowed = TRUE)
+  colorCombs <- permutations(colnum, 3, repeats.allowed = TRUE)
 
   #003
   T003Col=remEx(triad="003",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)

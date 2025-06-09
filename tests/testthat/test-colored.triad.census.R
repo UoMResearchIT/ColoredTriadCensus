@@ -51,10 +51,10 @@ test_that("T003-111 variations", {
   triads <- colored.triad.census(matrix(0,3,3), c(2,2,2), directed = FALSE)
   expect_equal_census(triads, c("T003-111" = 1))
 
-  triads <- colored.triad.census(matrix(0,3,3), c(1,1,1), directed = TRUE)
-  expect_equal_census(triads, c("T003-111" = 1))
+  triads <- colored.triad.census(matrix(0,3,3), c(2,2,2), color.set = 1:3)
+  expect_equal_census(triads, c("T003-222" = 1))
 
-  triads <- colored.triad.census(matrix(0,4,4), c(2,2,2,2))
+  triads <- colored.triad.census(matrix(0,4,4), c(1,1,1,1))
   expect_equal_census(triads, c("T003-111" = 4))
 })
 
