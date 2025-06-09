@@ -106,3 +106,26 @@ test_that("T012", {
   triads <- colored.triad.census(t(mat), c(1,1,2), directed = TRUE)
   expect_equal_census(triads, c("T012-211" = 1))
 })
+
+test_that("T201", {
+  mat <- triad.types[["201"]]
+  expect_equal(mat, t(mat))
+
+  triads <- colored.triad.census(mat, c(1,2,2), directed = TRUE)
+  expect_equal_census(triads, c("T201-122" = 1))
+
+  triads <- colored.triad.census(mat, c(2,1,2), directed = TRUE)
+  expect_equal_census(triads, c("T201-122" = 1))
+
+  triads <- colored.triad.census(mat, c(1,2,1), directed = TRUE)
+  expect_equal_census(triads, c("T201-121" = 1))
+
+  triads <- colored.triad.census(mat, c(2,1,1), directed = TRUE)
+  expect_equal_census(triads, c("T201-121" = 1))
+
+  triads <- colored.triad.census(mat, c(2,2,1), directed = TRUE)
+  expect_equal_census(triads, c("T201-221" = 1))
+
+  triads <- colored.triad.census(mat, c(1,1,2), directed = TRUE)
+  expect_equal_census(triads, c("T201-112" = 1))
+})

@@ -38,7 +38,7 @@ triad.types <- list(
   "111U" = matrix(c(0, 0, 0, 1, 0, 1, 0, 1, 0), nrow = 3, byrow = T),
   "030T" = matrix(c(0, 0, 0, 1, 0, 0, 1, 1, 0), nrow = 3, byrow = T),
   "030C" = matrix(c(0, 1, 0, 0, 0, 1, 1, 0, 0), nrow = 3, byrow = T),
-  "201"  = matrix(c(0, 1, 1, 1, 1, 0, 1, 0, 0), nrow = 3),
+  "201"  = matrix(c(0, 0, 1, 0, 0, 1, 1, 1, 0), nrow = 3),
   "120D" = matrix(c(0, 1, 1, 0, 0, 1, 0, 1, 0), nrow = 3, byrow = T),
   "120U" = matrix(c(0, 0, 0, 1, 0, 1, 1, 1, 0), nrow = 3, byrow = T),
   "120C" = matrix(c(0, 1, 0, 0, 0, 1, 1, 1, 0), nrow = 3, byrow = T),
@@ -90,14 +90,21 @@ makeUniqueTri=function(triangle,colorCombs){
 #' @return `ncolors^3` integer vector indicating a unique identifier
 #'  for each color permutation. Equivalent permutations will share the
 #'  same index.
-unique.triad.index <- function(type, ncolors) {
+#' @importFrom gtools permutations
+unique.triad.index <- function(type, ncolors, use.cache = TRUE) {
 
-  # TODO: call makeUniqueTri (and cache) for ncolors > 10
-  # imp=makeUniqueTri(triangle=triangle,colorCombs)
-  stopifnot(ncolors <= 10)
+  # TODO: #4 cache e.g. using memoise, instead of shipping uniTri
+  # TODO: #5 for ncolors > 3, surely it's more efficient to run makeUniqueTri
+  #  for 3 colors, and then map all other permutations using that index.
 
-  triangle <- triad.types[[type]]
   imp <- uniTri[[paste(ncolors, type, sep = " ")]]
+
+  if (is.null(imp) | !use.cache) {
+    triangle <- triad.types[[type]]
+    colorCombs <- permutations(ncolors, 3, repeats.allowed = TRUE)
+    imp <- makeUniqueTri(triangle = triangle, colorCombs)
+  }
+  return(imp)
 }
 
 #' @importFrom Matrix t diag
@@ -167,7 +174,7 @@ remEx=function(triad,colorCombs,testM,testE0,testC,cmat){
     if(triad=="201"){
       T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testM)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testE0)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testM))
       names(T003Col)[i]=paste("T201",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,1,1,1,0,1,0,0),nrow=3)
+      triangle=matrix(c(0,0,1,0,0,1,1,1,0),nrow=3)
     }
 
     if(triad=="120D"){
