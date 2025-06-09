@@ -1,31 +1,5 @@
 
 
-kfun<-function(k,output="fourClass",directed=T){
-  if(k>=3){
-    ef<-choose(k,3)+2*choose(k,2)+k
-    c030<-2*choose(k,3)+2*choose(k,2)+k
-    ex2<-3*choose(k,3)+4*choose(k,2)+k
-    uni<-6*choose(k,3)+6*choose(k,2)+k
-  }
-  if(k==2){
-    ef<-2*choose(k,2)+k
-    c030<-2*choose(k,2)+k
-    ex2<-4*choose(k,2)+k
-    uni<-6*choose(k,2)+k
-  }
-  if(k==1){
-    ef<-k
-    c030<-k
-    ex2<-k
-    uni<-k
-  }
-  if(output=="fourClass") return(c(ef,c030,ex2,uni))
-  if(output=="total") {
-    if(directed==T) return(sum(2*ef,c030,6*ex2,7*uni))
-    if(directed==F) return(sum(2*ef,2*ex2))
-  }
-}
-
 #' Triad adjacency matrices, as defined in Holland & Leinhardt (1976)
 triad.types <- list(
   "003"  = matrix(c(0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 3),
@@ -107,149 +81,55 @@ unique.triad.index <- function(type, ncolors, use.cache = TRUE) {
   return(imp)
 }
 
-#' @importFrom Matrix t diag
-remEx=function(triad,colorCombs,testM,testE0,testC,cmat){
-  T003Col=c()
-  for(i in 1:nrow(colorCombs)){
-    if(triad=="003"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testE0)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testE0)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testE0))
-      names(T003Col)[i]=paste("T003",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,0,0,0,0,0,0,0),nrow=3)
-    }
 
-    if(triad=="012"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testE0)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testE0)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T012",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,0,0,0,0,1,0,0),nrow=3,byrow=T)
-    }
+remove.isomorphic <- function(triad, colorCombs, counts) {
 
-    if(triad=="102"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testE0)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testE0))
-      names(T003Col)[i]=paste("T102",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,0,0,0,1,0,1,0),nrow=3)
-    }
+  imp <- unique.triad.index(triad, max(colorCombs))
+  stopifnot(length(counts) == length(imp))
 
-    if(triad=="021D"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testC)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testE0)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*t(testC)))
-      names(T003Col)[i]=paste("T021D",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,1,0,0,0,0,0,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="021U"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*t(testC))%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testE0)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T021U",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,0,1,0,0,1,0,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="021C"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testC)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testE0)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T021C",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,0,0,0,0,1,0,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="111D"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testC)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testE0))
-      names(T003Col)[i]=paste("T111D",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,0,0,0,1,0,1,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="111U"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*t(testC))%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testE0))
-      names(T003Col)[i]=paste("T111U",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,0,1,0,1,0,1,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="030T"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*t(testC))%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*t(testC))%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T030T",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,0,1,0,0,1,1,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="030C"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testC)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testC)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T030C",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,0,0,0,1,1,0,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="201"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testM)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testE0)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testM))
-      names(T003Col)[i]=paste("T201",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,1,0,0,1,1,1,0),nrow=3)
-    }
-
-    if(triad=="120D"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testC)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*t(testC)))
-      names(T003Col)[i]=paste("T120D",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,1,0,0,1,0,1,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="120U"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*t(testC))%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T120U",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,0,0,1,0,1,1,1,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="120C"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testC)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T120C",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,0,0,0,1,1,1,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="210"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testM)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testC))
-      names(T003Col)[i]=paste("T210",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,0,1,0,1,1,1,0),nrow=3,byrow=T)
-    }
-
-    if(triad=="300"){
-      T003Col[i]=tr((t(cmat[[colorCombs[i,2]]])*cmat[[colorCombs[i,1]]]*testM)%*%(t(cmat[[colorCombs[i,3]]])*cmat[[colorCombs[i,2]]]*testM)%*%(t(cmat[[colorCombs[i,1]]])*cmat[[colorCombs[i,3]]]*testM))
-      names(T003Col)[i]=paste("T300",paste(colorCombs[i,],collapse="",sep=""),sep="-")
-      triangle=matrix(c(0,1,1,1,0,1,1,1,0),nrow=3)
-    }
+  T003Col2 <- c()
+  for (i in unique(imp))
+  {
+    T003Col2[length(T003Col2) + 1] <- counts[imp == i][1]
+    names(T003Col2)[length(T003Col2)] <- names(counts)[imp == i][1]
   }
 
-  imp = unique.triad.index(triad, max(colorCombs))
-  stopifnot(length(imp) == length(T003Col))
-
-  T003Col2=c()
-  for(i in unique(imp))
+  for (i in unique(imp))
   {
-    T003Col2[length(T003Col2)+1]=T003Col[imp==i][1]
-    names(T003Col2)[length(T003Col2)]=names(T003Col)[imp==i][1]
-
-    if(triad %in% c("003","300")){
-      if (colorCombs[i,1]==colorCombs[i,2] | colorCombs[i,1]==colorCombs[i,3] | colorCombs[i,2]==colorCombs[i,3]) T003Col2[length(T003Col2)]=T003Col2[length(T003Col2)]/2
-      if (colorCombs[i,1]==colorCombs[i,2] & colorCombs[i,1]==colorCombs[i,3] & colorCombs[i,2]==colorCombs[i,3]) T003Col2[length(T003Col2)]=T003Col2[length(T003Col2)]/3
+    if (triad %in% c("003", "300")) {
+      if (
+        colorCombs[i, 1] == colorCombs[i, 2] |
+        colorCombs[i, 1] == colorCombs[i, 3] |
+        colorCombs[i, 2] == colorCombs[i, 3]
+      ) {
+        count <- count / 2
+      }
+      if (
+        colorCombs[i, 1] == colorCombs[i, 2] &
+        colorCombs[i, 1] == colorCombs[i, 3] &
+        colorCombs[i, 2] == colorCombs[i, 3]
+      ) {
+        count <- count / 3
+      }
     }
 
-    if(triad=="030C") if (colorCombs[i,1]==colorCombs[i,2] & colorCombs[i,1]==colorCombs[i,3] & colorCombs[i,2]==colorCombs[i,3]) T003Col2[length(T003Col2)]=T003Col2[length(T003Col2)]/3
+    if (triad == "030C")
+      if (colorCombs[i, 1] == colorCombs[i, 2] &
+          colorCombs[i, 1] == colorCombs[i, 3] &
+          colorCombs[i, 2] == colorCombs[i, 3])
+        count <- count / 3
 
-    if(triad %in% c("102","021D","021U","201","120D","120U")) if (colorCombs[i,3]==colorCombs[i,2]) T003Col2[length(T003Col2)]=T003Col2[length(T003Col2)]/2
-
+    if (triad %in% c("102", "021D", "021U", "201", "120D", "120U"))
+      if (colorCombs[i, 3] == colorCombs[i, 2])
+        count <- count / 2
   }
   # print(triad)
   return(T003Col2)
 }
 
 
-#' @param mat adjacency matrix
-#' @param col vector of colors for each node
-#' @param color.set complete/ordered set of colors
-#' @param directed whether to count directed triads
-#' @return a named vector with counts of colored triads
-#'
 #' @importFrom Matrix Matrix t diag
-#' @importFrom gtools permutations
-#' @export
-colored.triad.census <- function(mat,
-                                 col = rep(1, nrow(mat)),
-                                 color.set = sort(unique(col), na.last = TRUE),
-                                 directed = FALSE){
-
-  stopifnot(all(col %in% color.set))
-  stopifnot(nrow(mat) == ncol(mat))
-  stopifnot(length(col) == nrow(mat))
-  stopifnot(all(mat %in% c(0, 1)))
+get.triad.matrices <- function(mat) {
 
   #Adjacency matrix
   testA=mat[,]
@@ -270,55 +150,84 @@ colored.triad.census <- function(mat,
   testE=Matrix(testE)
   testE0=Matrix(testE0)
 
-  colnum <- length(color.set)
-  colNums <- match(col, color.set)
+  triad.matrices <- list(
+    "003" = list(HT12 = testE0, HT23 = testE0, HT31 = testE0),
+    "012" = list(HT12 = testE0, HT23 = testE0, HT31 = testC),
+    "102" = list(HT12 = testE0, HT23 = testM, HT31 = testE0),
+    "021D" = list(HT12 = testC, HT23 = testE0, HT31 = t(testC)),
+    "021U" = list(HT12 = t(testC), HT23 = testE0, HT31 = testC),
+    "021C" = list(HT12 = testC, HT23 = testE0, HT31 = testC),
+    "111D" = list(HT12 = testC, HT23 = testM, HT31 = testE0),
+    "111U" = list(HT12 = t(testC), HT23 = testM, HT31 = testE0),
+    "030T" = list(HT12 = t(testC), HT23 = t(testC), HT31 = testC),
+    "030C" = list(HT12 = testC, HT23 = testC, HT31 = testC),
+    "201" = list(HT12 = testM, HT23 = testE0, HT31 = testM),
+    "120D" = list(HT12 = testC, HT23 = testM, HT31 = t(testC)),
+    "120U" = list(HT12 = t(testC), HT23 = testM, HT31 = testC),
+    "120C" = list(HT12 = testC, HT23 = testM, HT31 = testC),
+    "210" = list(HT12 = testM, HT23 = testM, HT31 = testC),
+    "300" = list(HT12 = testM, HT23 = testM, HT31 = testM)
+  )
+}
 
-  #Makes matrix for each color where for every node that is that color, that entire column is 1
-  cmat=list()
-  for(i in 1:colnum){
-    cmat[[i]]=Matrix(rep(colNums==i,length(col)),nrow=length(col),byrow=FALSE)*1
-    cmat[[i]][,]
+
+#' @param mat adjacency matrix
+#' @param col vector of colors for each node
+#' @param color.set complete/ordered set of colors
+#' @param directed whether to count directed triads
+#' @return a named vector with counts of colored triads
+#'
+#' @importFrom Matrix Matrix t diag
+#' @importFrom gtools permutations
+#' @export
+colored.triad.census <- function(mat, col, color.set = unique(col), directed=FALSE){
+
+  stopifnot(all(col %in% color.set))
+  stopifnot(nrow(mat) == ncol(mat))
+  stopifnot(length(col) == nrow(mat))
+  stopifnot(all(mat %in% c(0, 1)))
+
+  colnum <- length(color.set)
+  colorIndex <- match(col, color.set)
+
+  # Make out-coloring matrices, evaluating the color of the nodes row-wise
+  # the complete row cmat[[i]][j,] == 1 if node j has color i
+  cmat <- list()
+  for (i in 1:colnum) {
+    cmat[[i]] <- Matrix(rep(colorIndex == i, length(col)), nrow = length(col), byrow = FALSE) * 1
+    cmat[[i]][, ]
   }
   colorCombs <- permutations(colnum, 3, repeats.allowed = TRUE)
 
-  #003
-  T003Col=remEx(triad="003",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-  #102
-  T102Col=remEx("102",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-  #201
-  T201Col=remEx("201",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-  #300
-  T300Col=remEx("300",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-  x=c(T003Col,T102Col,T201Col,T300Col)
+  # count triads (with redundancies)
+  triad.count <- function(triad) {
 
-  if(directed==T) {
-    #012
-    T012Col=remEx("012",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #021D
-    T021DCol=remEx("021D",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #021C
-    T021CCol=remEx("021C",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #021U
-    T021UCol=remEx("021U",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #030T
-    T030TCol=remEx("030T",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #030C
-    T030CCol=remEx("030C",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #120D
-    T120DCol=remEx("120D",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #120U
-    T120UCol=remEx("120U",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #120C
-    T120CCol=remEx("120C",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #210
-    T210Col=remEx("210",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #111D
-    T111DCol=remEx("111D",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    #111U
-    T111UCol=remEx("111U",colorCombs=colorCombs,testM=testM,testE0=testE0,testC=testC,cmat=cmat)
-    x=c(T003Col,T102Col,T012Col,T201Col,T300Col,T021DCol,T021UCol,T021CCol,T030TCol,T030CCol,T120DCol,T120UCol,T120CCol,T210Col,T111DCol,T111UCol)
+    HT12 <- triad.matrices[[triad]]$HT12
+    HT23 <- triad.matrices[[triad]]$HT23
+    HT31 <- triad.matrices[[triad]]$HT31
+
+    counts <- c()
+    for (i in 1:nrow(colorCombs)) {
+      counts[i] <- tr(
+        (t(cmat[[colorCombs[i, 2]]]) * cmat[[colorCombs[i, 1]]] * HT12) %*%
+        (t(cmat[[colorCombs[i, 3]]]) * cmat[[colorCombs[i, 2]]] * HT23) %*%
+        (t(cmat[[colorCombs[i, 1]]]) * cmat[[colorCombs[i, 3]]] * HT31)
+      )
+    }
+    names(counts) <- apply(colorCombs, 1, function(x) paste0(x, collapse = ""))
+    names(counts) <- lapply(names(counts), function(x) paste0("T", triad, "-", x))
+
+    remove.isomorphic(triad, colorCombs, counts)
   }
-  return(x)
+
+  if (directed) {
+    types <- names(triad.matrices)  # use all types
+  } else {
+    types <- c("003", "102", "201", "300")
+  }
+
+  all_counts <- lapply(types, triad.count)
+  do.call(c, all_counts)
 }
 
 
