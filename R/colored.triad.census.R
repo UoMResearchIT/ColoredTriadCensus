@@ -26,6 +26,26 @@ kfun<-function(k,output="fourClass",directed=T){
   }
 }
 
+#' Triad adjacency matrices, as defined in Holland & Leinhardt (1976)
+triad.types <- list(
+  "003"  = matrix(c(0, 0, 0, 0, 0, 0, 0, 0, 0), nrow = 3),
+  "012"  = matrix(c(0, 0, 0, 0, 0, 0, 1, 0, 0), nrow = 3, byrow = T),
+  "102"  = matrix(c(0, 0, 0, 0, 0, 1, 0, 1, 0), nrow = 3),
+  "021D" = matrix(c(0, 1, 1, 0, 0, 0, 0, 0, 0), nrow = 3, byrow = T),
+  "021U" = matrix(c(0, 0, 0, 1, 0, 0, 1, 0, 0), nrow = 3, byrow = T),
+  "021C" = matrix(c(0, 1, 0, 0, 0, 0, 1, 0, 0), nrow = 3, byrow = T),
+  "111D" = matrix(c(0, 1, 0, 0, 0, 1, 0, 1, 0), nrow = 3, byrow = T),
+  "111U" = matrix(c(0, 0, 0, 1, 0, 1, 0, 1, 0), nrow = 3, byrow = T),
+  "030T" = matrix(c(0, 0, 0, 1, 0, 0, 1, 1, 0), nrow = 3, byrow = T),
+  "030C" = matrix(c(0, 1, 0, 0, 0, 1, 1, 0, 0), nrow = 3, byrow = T),
+  "201"  = matrix(c(0, 1, 1, 1, 1, 0, 1, 0, 0), nrow = 3),
+  "120D" = matrix(c(0, 1, 1, 0, 0, 1, 0, 1, 0), nrow = 3, byrow = T),
+  "120U" = matrix(c(0, 0, 0, 1, 0, 1, 1, 1, 0), nrow = 3, byrow = T),
+  "120C" = matrix(c(0, 1, 0, 0, 0, 1, 1, 1, 0), nrow = 3, byrow = T),
+  "210"  = matrix(c(0, 1, 0, 1, 0, 1, 1, 1, 0), nrow = 3, byrow = T),
+  "300"  = matrix(c(0, 1, 1, 1, 0, 1, 1, 1, 0), nrow = 3)
+)
+
 #' @importFrom Matrix diag
 tr=function(mat){return(sum(diag(mat)))}
 
